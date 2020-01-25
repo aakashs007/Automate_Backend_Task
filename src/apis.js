@@ -74,9 +74,10 @@ class API {
     }
   }
 
+  async generateApiKey() {
+    return "";
+  }
+
 }
 
-//module.exports = new API;
-let obj = new API();
-
-obj.getRandomWord();
+module.exports = new API;

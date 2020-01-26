@@ -193,6 +193,11 @@ async function playGame() {
         user_inp = await onUserFail();
 
         if(user_inp.user_action === 'Quit') {
+          console.log(chalk.yellow(`The correct answer is : ${_answer}`));
+          executeDefnCommand(_answer);
+          executeSynCommands(_answer);
+          excecuteAntCommand(_answer);
+          executeExCommand(_answer);    
           break;
         } else if(user_inp.user_action === 'Get Hint') {
           getHint(_word_definations,_word_syn,_word_ant,_answer);

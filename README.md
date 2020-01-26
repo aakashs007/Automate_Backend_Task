@@ -5,7 +5,7 @@ Installation
 
 1. Run Command 
 
-        npm install -g
+        npm install
 
 
 Requirements

@@ -17,3 +17,5 @@ console.log(
     figlet.textSync('CL Dictionary Tool', { horizontalLayout: 'full' })
   )
 );
+
+require('./src/commands')(process.argv);

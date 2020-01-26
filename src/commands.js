@@ -1,6 +1,8 @@
+//@ts-check
 const chalk = require('chalk');
 const apis = require('./apis');
 const inquirer = require('inquirer');
+const exec_commands = require('./execute_commands');
 
 function processInputCommand(_argv) { 
   if(_argv.length === 4) {
@@ -9,19 +11,19 @@ function processInputCommand(_argv) {
 
     switch (_command) {
       case 'defn':
-        executeDefnCommand(_word);
+        exec_commands.executeDefnCommand(_word);
       break;
   
       case 'syn':
-        executeSynCommands(_word);
+        exec_commands.executeSynCommands(_word);
       break;
   
       case 'ant':
-        excecuteAntCommand(_word);     
+        exec_commands.excecuteAntCommand(_word);     
       break;
   
       case 'ex':
-        executeExCommand(_word);
+        exec_commands.executeExCommand(_word);
       break;
 
       default:
@@ -35,91 +37,14 @@ function processInputCommand(_argv) {
       //play game
       playGame();
     } else {
-      executeDefnCommand(_word);
-      executeSynCommands(_word);
-      excecuteAntCommand(_word);
-      executeExCommand(_word);
+      exec_commands.executeDefnCommand(_word);
+      exec_commands.executeSynCommands(_word);
+      exec_commands.excecuteAntCommand(_word);
+      exec_commands.executeExCommand(_word);
     }
   } else if(_argv.length === 2) {
     executeRandomWordCommand();
   }
-}
-
-function relativeWordsProcess(data,_word,_type) {
-  let syn_found = false;
-
-  for(let i=0;i<data.length;i++) {
-    if(data[i].relationshipType === _type) {
-      syn_found = true;
-      console.log(`\n${_type}s for the word ${_word} are as follows : \n`);
-      for(let j=0;j<data[i].words.length;j++) {
-        console.log(chalk.blue(`${data[i].words[j]}`));
-      }
-      break;
-    }
-  }
-
-  if(!syn_found) {
-    console.log(chalk.red(`\nNo ${_type}s were found for "${_word}"`))
-  }
-}
-
-function executeDefnCommand(_word) {
-  apis.getWordDefinitions(_word).then((data) => {
-    data = JSON.parse(data);
-
-    if(data.length) {
-      console.log(`Here are the found definations for ${_word}: \n`);
-
-      for(let i=0;i<data.length;i++) {
-        console.log(chalk.blue(data[i].text));
-      }
-    } else {
-      console.log(chalk.red(`No definations were found for "${_word}"`));
-    }
-
-  }).catch(err => {
-    console.log(chalk.red(`${err}`));
-  })
-}
-
-function executeSynCommands(_word) {
-  apis.getRelativeWords(_word).then(data => {
-    data = JSON.parse(data);
-
-    relativeWordsProcess(data,_word,'synonym');
-
-  }).catch(err => {
-    console.log(chalk.red(`${err}`));
-  });
-}
-
-function excecuteAntCommand(_word) {
-  apis.getRelativeWords(_word).then(data => {
-    data = JSON.parse(data);
-
-    relativeWordsProcess(data,_word,'antonym');
-
-  }).catch(err => {
-    console.log(chalk.red(`${err}`));
-  });
-}
-
-function executeExCommand(_word) {
-  apis.getWordExamples(_word).then(data => {
-    data = JSON.parse(data);
-
-    if(data.examples.length) {
-      console.log(`\nHere are some examples for the word "${_word}"\n`);
-      for(let i=0;i<data.examples.length;i++) {
-        console.log(chalk.blue(`${i+1}). ${data.examples[i].text}\n`));
-      }
-    } else {
-      console.log(chalk.red(`No examples were found for the word "${_word}"`));
-    }
-  }).catch(err => {
-    console.log(chalk.red(`${err}`));
-  })  
 }
 
 function executeRandomWordCommand() {
@@ -128,16 +53,16 @@ function executeRandomWordCommand() {
 
     let _word = data['word'];
 
-    console.log(chalk.blue(`Random word is "${_word}" \n`))
+    console.log(chalk.blue(`Word of the day is "${_word}" \n`))
 
-    executeDefnCommand(_word);
-    executeSynCommands(_word);
-    excecuteAntCommand(_word);
-    executeExCommand(_word);
+    exec_commands.executeDefnCommand(_word);
+    exec_commands.executeSynCommands(_word);
+    exec_commands.excecuteAntCommand(_word);
+    exec_commands.executeExCommand(_word);
     
   }).catch(err => {
     console.log(chalk.red(`${err}`))
-  })  
+  })      
 }
 
 async function playGame() {
@@ -161,30 +86,33 @@ async function playGame() {
     let _word_ant = (_word_syn_ant.length === 2) ?  _word_syn_ant[0].words: [];
 
     let show = "";
-    if(_display[_random] === 'defn') {
+    let _dis_rnd = _display[_random];
+
+    if(_dis_rnd === 'defn') {
       show = _word_definations[Math.floor(Math.random()*_word_definations.length)].text;
-    } else if(_display[_random] === 'syn') {
+    } else if(_dis_rnd === 'syn') {
       show = _word_syn[Math.floor(Math.random()*_word_syn.length)];
     } else {
       if(_word_ant.length) {
         show = _word_ant[Math.floor(Math.random()*_word_ant.length)];
       } else {
         show = _word_syn[Math.floor(Math.random()*_word_syn.length)];
+        _dis_rnd = 'syn';
       }
     }
 
     let user_inp = {};
 
     while(true) {
-      user_inp = await getUserInput(show,_display[_random]);
+      user_inp = await getUserInput(show,_dis_rnd);
 
       let answer_is = false;
       for(let i=0;i<_word_syn.length;i++) {
-        if(_word_syn[i] === user_inp.user_answer) {
+        if(_word_syn[i] === user_inp.user_answer && user_inp.user_answer !== show) {
           console.log(chalk.green(`Congratulations! you got that right`));
           answer_is = true;
         }
-      }      
+      }
 
       if(!answer_is) {
         //wrong answer
@@ -194,10 +122,10 @@ async function playGame() {
 
         if(user_inp.user_action === 'Quit') {
           console.log(chalk.yellow(`The correct answer is : ${_answer}`));
-          executeDefnCommand(_answer);
-          executeSynCommands(_answer);
-          excecuteAntCommand(_answer);
-          executeExCommand(_answer);    
+          exec_commands.executeDefnCommand(_answer);
+          exec_commands.executeSynCommands(_answer);
+          exec_commands.excecuteAntCommand(_answer);
+          exec_commands.executeExCommand(_answer);  
           break;
         } else if(user_inp.user_action === 'Get Hint') {
           getHint(_word_definations,_word_syn,_word_ant,_answer);
@@ -214,7 +142,7 @@ async function playGame() {
   }
 }
 
-function getUserInput(show,_type,_correct_answers) {
+function getUserInput(show,_type) {
   let type = {
     'defn': 'defination',
     'syn': 'synonym',

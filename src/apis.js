@@ -1,5 +1,7 @@
 const configs = require('../config').getEnvs();
 const request = require('request');
+const CLI = require('clui');
+const Spinner = CLI.Spinner;
 
 class API {
 
@@ -15,13 +17,17 @@ class API {
       method: _request_type,
     }
 
+    const status = new Spinner('Fetching data, please wait...');
+    status.start();
+
     return new Promise((resolve,reject) => {
       request(options,(err,res,body) => {
         if(!err) {
           resolve(body);
         } else {
           reject(err);
-        }
+        }        
+        status.stop();        
       });
     });
   }
@@ -31,7 +37,6 @@ class API {
 
     try {
       const response = await this.baseCall('GET',path);
-      console.log(`Response recieved ${response}`)
       return response;
     } catch(err) {
       console.log(`Error Occured in api calling ${err}`)
@@ -43,7 +48,6 @@ class API {
 
     try {
       const response = await this.baseCall('GET',path);
-      console.log(`Response recieved ${response}`)
       return response;
     } catch(err) {
       console.log(`Error Occured in api calling ${err}`)
@@ -55,7 +59,6 @@ class API {
 
     try {
       const response = await this.baseCall('GET',path);
-      console.log(`Response recieved ${response}`)
       return response;
     } catch(err) {
       console.log(`Error Occured in api calling ${err}`)
@@ -67,15 +70,10 @@ class API {
     
     try {
       const response = await this.baseCall('GET',path);
-      console.log(`Response recieved ${response}`)
       return response;
     } catch(err) {
       console.log(`Error Occured in api calling ${err}`)
     }
-  }
-
-  async generateApiKey() {
-    return "";
   }
 
 }

@@ -160,21 +160,24 @@ async function playGame() {
     let _word_syn = _word_syn_ant[_word_syn_ant.length-1].words;
     let _word_ant = (_word_syn_ant.length === 2) ?  _word_syn_ant[0].words: [];
 
-    while(true) {
-      let show = "";
-      if(_display[_random] === 'defn') {
-        show = _word_definations[Math.floor(Math.random()*_word_definations.length)].text;
-      } else if(_display[_random] === 'syn') {
-        show = _word_syn[Math.floor(Math.random()*_word_syn.length)];
+    let show = "";
+    if(_display[_random] === 'defn') {
+      show = _word_definations[Math.floor(Math.random()*_word_definations.length)].text;
+    } else if(_display[_random] === 'syn') {
+      show = _word_syn[Math.floor(Math.random()*_word_syn.length)];
+    } else {
+      if(_word_ant.length) {
+        show = _word_ant[Math.floor(Math.random()*_word_ant.length)];
       } else {
-        if(_word_ant.length) {
-          show = _word_ant[Math.floor(Math.random()*_word_ant.length)];
-        } else {
-          show = _word_syn[Math.floor(Math.random()*_word_syn.length)];
-        }
+        show = _word_syn[Math.floor(Math.random()*_word_syn.length)];
       }
-  
-      const user_inp = await getUserInput(show,_display[_random]);
+    }
+
+    let user_inp = {};
+
+    while(true) {
+      user_inp = await getUserInput(show,_display[_random]);
+
       let answer_is = false;
       for(let i=0;i<_word_syn.length;i++) {
         if(_word_syn[i] === user_inp.user_answer) {
@@ -187,7 +190,16 @@ async function playGame() {
         //wrong answer
         console.log(chalk.red(`Sorry! That is a wrong answer!`))
 
-        
+        user_inp = await onUserFail();
+
+        if(user_inp.user_action === 'Quit') {
+          break;
+        } else if(user_inp.user_action === 'Get Hint') {
+          getHint(_word_definations,_word_syn,_word_ant,_answer);
+        }
+      } else {
+        console.log(chalk.green(`\nThanks for playing! see you soon!`))
+        break;
       }
 
     }
@@ -216,6 +228,53 @@ function getUserInput(show,_type,_correct_answers) {
   ];
 
   return inquirer.prompt(query);
+}
+
+function onUserFail() {
+  const query = [
+    {
+      type: 'list',
+      name: 'user_action',
+      message: `What do you want to do now ?`,
+      choices: ['Try Again','Get Hint','Quit'],
+      default: ['Try Again'],
+      validate: (value) => {
+        return true;
+      }
+    }
+  ];
+
+  return inquirer.prompt(query);
+}
+
+function getHint(_word_definations,_word_syn,_word_ant,_answer) {
+  let hint_type = ['shfl','dfn','syn','ant'];
+  let text = {
+    'shfl' : 'Shuffled word is ',
+    'dfn' : 'Defination for the word is ',
+    'syn' : 'Synonym for the word is ',
+    'ant' : 'Antonym for the word is '
+  };
+
+  let _random = Math.floor(Math.random()*hint_type.length)
+
+  let showing_hint = "";
+  if(hint_type[_random] === 'shfl') {
+    showing_hint = shuffelWord(_answer);
+  } else if(hint_type[_random] === 'dfn') {
+    showing_hint = _word_definations[Math.floor(Math.random()*_word_definations.length)].text;
+  } else if(hint_type[_random] === 'syn'){
+    showing_hint = _word_syn[Math.floor(Math.random()*_word_syn.length)];
+  } else {
+    if(_word_ant.length) {
+      showing_hint = _word_ant[Math.floor(Math.random()*_word_ant.length)];
+    } else {
+      showing_hint = _word_syn[Math.floor(Math.random()*_word_syn.length)];
+      hint_type[_random] = 'syn';
+    }
+  }
+
+  console.log(chalk.yellow(`\n\n${text[hint_type[_random]]} \n ${showing_hint}\n\n`))
 }
 
 function shuffelWord (word){

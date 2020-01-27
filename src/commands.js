@@ -108,9 +108,10 @@ async function playGame() {
 
       let answer_is = false;
       for(let i=0;i<_word_syn.length;i++) {
-        if(_word_syn[i] === user_inp.user_answer && user_inp.user_answer !== show) {
+        if((_word_syn[i] === user_inp.user_answer || user_inp.user_answer === _answer) && user_inp.user_answer !== show) {
           console.log(chalk.green(`Congratulations! you got that right`));
           answer_is = true;
+          break;
         }
       }
 

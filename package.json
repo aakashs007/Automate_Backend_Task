@@ -17,7 +17,7 @@
     "express": "^4.17.1",
     "figlet": "^1.2.4",
     "inquirer": "^7.0.4",
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.6"
   },
   "bin": {
     "./dict": "./index.js"

@@ -14,7 +14,7 @@
     "clear": "^0.1.0",
     "clui": "^0.3.6",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "figlet": "^1.2.4",
     "inquirer": "^7.0.4",
     "minimist": "^1.2.0"
